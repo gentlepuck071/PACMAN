@@ -1,87 +1,69 @@
 #include <SDL.h>
+#include <iostream>
 
-// Constants
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 600;
-const int SQUARE_SIZE = 50;
+#define WINDOW_HEIGHT 800
+#define WINDOW_WIDTH 800
 
-// Function to handle events
-void handleEvents(SDL_Event& e, bool& quit, int& posX, int& posY);
-
-int main(int argc, char* args[]) {
+int main(void) {
     // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
+    if(SDL_Init(SDL_INIT_VIDEO) < 0) {
+        std::cout << "Could not initialize SDL! SLD_Error: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+    std::cout << "SLD initialized succesfully!" << std::endl;
+
+    // Create main window
+    SDL_Window* main_window = SDL_CreateWindow("Main Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+    if(!main_window) {
+        std::cout << "Could not create main window! SLD_Error: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+    // Create secondary window
+    SDL_Window* sec_window = SDL_CreateWindow("Secondary Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, WINDOW_WIDTH, WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+    if(!sec_window) {
+        std::cout << "Could not create secondary window! SLD_Error: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+    
+    // Create main renderer
+    SDL_Renderer* main_renderer = SDL_CreateRenderer(main_window, -1, SDL_RENDERER_ACCELERATED);
+    if(!main_renderer) {
+        std::cout << "Could not create main renderer! SLD_Error: " << SDL_GetError() << std::endl;
+        return 1;
+    }
+    // Create secondary renderer
+    SDL_Renderer* sec_renderer = SDL_CreateRenderer(sec_window, -1, SDL_RENDERER_ACCELERATED);
+    if(!sec_renderer) {
+        std::cout << "Could not create secondary renderer! SLD_Error: " << SDL_GetError() << std::endl;
         return 1;
     }
 
-    // Create a window
-    SDL_Window* window = SDL_CreateWindow("Moving Square", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-    if (!window) {
-        printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    // Create a renderer
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
-    if (!renderer) {
-        printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
-        return 1;
-    }
-
-    // Initial position of the square
-    int posX = SCREEN_WIDTH / 2 - SQUARE_SIZE / 2;
-    int posY = SCREEN_HEIGHT / 2 - SQUARE_SIZE / 2;
-
-    // Game loop
     bool quit = false;
     SDL_Event e;
+    while(!quit) {
+        while(SDL_PollEvent(&e) != 0) {
+            if(e.type == SDL_QUIT) {
+                quit = true;
+            }
+        }
 
-    while (!quit) {
-        // Event handling
-        handleEvents(e, quit, posX, posY);
-
-        // Clear the screen
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
-
-        // Draw the moving square
-        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-        SDL_Rect squareRect = { posX, posY, SQUARE_SIZE, SQUARE_SIZE };
-        SDL_RenderFillRect(renderer, &squareRect);
-
-        // Update the screen
-        SDL_RenderPresent(renderer);
+        // Main Window
+        SDL_SetRenderDrawColor(main_renderer, 0, 0, 0, 255);
+        SDL_RenderClear(main_renderer);
+        SDL_RenderPresent(main_renderer);
+        
+        // Secondary Window
+        SDL_SetRenderDrawColor(sec_renderer, 255, 0, 0, 255);
+        SDL_RenderClear(sec_renderer);
+        SDL_RenderPresent(sec_renderer);
     }
 
-    // Clean up
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
+    // Cleanup
+    SDL_DestroyRenderer(main_renderer);
+    SDL_DestroyWindow(main_window);
+    SDL_DestroyWindow(sec_window);
+    SDL_DestroyRenderer(sec_renderer);
     SDL_Quit();
 
     return 0;
 }
-
-void handleEvents(SDL_Event& e, bool& quit, int& posX, int& posY) {
-    while (SDL_PollEvent(&e) != 0) {
-        if (e.type == SDL_QUIT) {
-            quit = true;
-        } else if (e.type == SDL_KEYDOWN) {
-            switch (e.key.keysym.sym) {
-                case SDLK_UP:
-                    posY -= 10;
-                    break;
-                case SDLK_DOWN:
-                    posY += 10;
-                    break;
-                case SDLK_LEFT:
-                    posX -= 10;
-                    break;
-                case SDLK_RIGHT:
-                    posX += 10;
-                    break;
-            }
-        }
-    }
-}
-

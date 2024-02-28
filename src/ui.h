@@ -6,7 +6,7 @@
 
 const std::string imgPath = "res/amongus.bmp";
 const int MAIN_WINDOW_WIDTH = 600;
-const int MAIN_WINDOW_HEIGHT = 600;
+const int MAIN_WINDOW_HEIGHT = 800;
 
 extern SDL_Window* main_window;
 extern SDL_Surface* main_screenSurface;

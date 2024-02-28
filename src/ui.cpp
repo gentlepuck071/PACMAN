@@ -1,56 +1,91 @@
 #include "ui.h"
 #include <iostream>
+#include <SDL.h>
 
-bool ui_init() {
+bool UserInterface::init() {
     // Initialization flag
     bool succes = true;
 
-    // Initialize SDL
+    // Initialise SDL
     if(SDL_Init(SDL_INIT_VIDEO) < 0) {
         std::cout << "SDL could not be initialized! SLD_Error: " << SDL_GetError() << std::endl;
         succes = false;
     }
     else {
         // Create main window
-        main_window = SDL_CreateWindow("Main Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
-        if(main_window == NULL) {
+        mainWindow = SDL_CreateWindow("Main Window", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, MAIN_WINDOW_WIDTH, MAIN_WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+        if(mainWindow == NULL) {
             std::cout << "Main Window could not be created! SLD_Error: " << SDL_GetError() << std::endl;
             succes = false;
         }
         else {
             // Get main windows surface
-            main_screenSurface = SDL_GetWindowSurface(main_window);
+            mainScrSurface = SDL_GetWindowSurface(mainWindow);
         }
     }
 
     return succes;
 }
 
-bool ui_loadMedia() {
+bool UserInterface::loadMedia() {
     // Loading succes flag
     bool succes = true;
 
-    std::cout << imgPath << std::endl;
-
     // Load image
-    img_screenSurface = SDL_LoadBMP(imgPath.c_str());
-    if(img_screenSurface == NULL) {
+    backgroundSurface = SDL_LoadBMP(backgroundImgPath.c_str());
+    if(backgroundSurface == NULL) {
         std::cout << "Unable to load image! SDL_Error: " << SDL_GetError() << std::endl;
         succes = false;
+    }
+    else {
+        if((mainScrSurface == NULL) || (mainWindow == NULL)) {
+            std::cout << "Window not initialized! SDL_Error: " << SDL_GetError() << std::endl;
+            succes = false;
+        }
+        else {
+            // Apply the image
+            SDL_BlitSurface(backgroundSurface, NULL, mainScrSurface, NULL);
+
+            // Update the surface
+            SDL_UpdateWindowSurface(mainWindow);
+        }
     }
 
     return succes;
 }
 
-void ui_close() {
+void UserInterface::close() {
     // Deallocate image surface
-    SDL_FreeSurface(img_screenSurface);
-    img_screenSurface = NULL;
+    SDL_FreeSurface(backgroundSurface);
+    backgroundSurface = NULL;
 
     // Destroy main window
-    SDL_DestroyWindow(main_window);
-    main_window = NULL;
+    SDL_DestroyWindow(mainWindow);
+    mainWindow = NULL;
 
     // Quit SDL subsystem
     SDL_Quit();
+}
+
+int UserInterface::gameLoop() {
+    // Error flag
+    int error = 0;
+
+    if((mainWindow == NULL) || (mainScrSurface == NULL) || (backgroundSurface == NULL)) {
+        std::cout << "UI elements not initialized! SDL_Error: " << SDL_GetError() << std::endl;
+        error = 1;
+    }
+    else {
+        // Event loop
+        SDL_Event e;
+        bool quit = false;
+        while(!quit) {
+            while(SDL_PollEvent(&e)) {
+                if(e.type == SDL_QUIT)
+                    quit = true;
+            }
+        }
+    } 
+
+    return error;
 }

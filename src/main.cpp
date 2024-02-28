@@ -2,39 +2,15 @@
 #include <iostream>
 #include <SDL.h>
 
-SDL_Window* main_window = NULL;
-SDL_Surface* main_screenSurface = NULL;
-SDL_Surface* img_screenSurface = NULL;
-
 int main(int argc, char* args[]) {
-    // start SDL and create main window
-    if(!ui_init())
-        std::cout << "Failed to initialize!" << std::endl;
-    else {
-        // Load media
-        if(!ui_loadMedia())
-            std::cout << "Failed to load media!" << std::endl;
-        else {
-            // Apply the image
-            SDL_BlitSurface(img_screenSurface, NULL, main_screenSurface, NULL);
+    UserInterface mainUI;
 
-            // Update the surface
-            SDL_UpdateWindowSurface(main_window);
-        }
-
-        // Event loop
-        SDL_Event e;
-        bool quit = false;
-        while(!quit) {
-            while(SDL_PollEvent(&e)) {
-                if(e.type == SDL_QUIT)
-                    quit = true;
-            }
-        }
+    if(mainUI.init()) {
+        if(mainUI.loadMedia())
+            mainUI.gameLoop();
     }
 
-    // Free resources and close SDL
-    ui_close();
+    mainUI.close();
 
     return 0;
 }

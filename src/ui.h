@@ -1,19 +1,23 @@
-#ifndef UI_ELEMENTS
-#define UI_ELEMENTS
+#ifndef UI_CLASS
+#define UI_CLASS
 
 #include <SDL.h>
 #include <string>
 
-const std::string imgPath = "res/amongus.bmp";
-const int MAIN_WINDOW_WIDTH = 600;
-const int MAIN_WINDOW_HEIGHT = 800;
+class UserInterface {
+    public:
+        bool init();
+        bool loadMedia();
+        void close();
+        int gameLoop();
 
-extern SDL_Window* main_window;
-extern SDL_Surface* main_screenSurface;
-extern SDL_Surface* img_screenSurface;
-
-bool ui_init();
-bool ui_loadMedia();
-void ui_close();
+    private:
+        int MAIN_WINDOW_WIDTH = 600;
+        int MAIN_WINDOW_HEIGHT = 800;
+        SDL_Window* mainWindow = NULL;
+        SDL_Surface* mainScrSurface = NULL;
+        SDL_Surface* backgroundSurface = NULL;
+        std::string backgroundImgPath = "res/amongus.bmp";
+};
 
 #endif

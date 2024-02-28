@@ -3,6 +3,7 @@
 
 #include <SDL.h>
 #include <string>
+#include <SDL2/SDL_image.h>
 
 class UserInterface {
     public:
@@ -17,7 +18,8 @@ class UserInterface {
         SDL_Window* mainWindow = NULL;
         SDL_Surface* mainScrSurface = NULL;
         SDL_Surface* backgroundSurface = NULL;
-        std::string backgroundImgPath = "res/amongus.bmp";
+        std::string backgroundImgPath = "res/amongus.png";
+        SDL_Surface* loadSurface(std::string imgPath);
 };
 
 #endif

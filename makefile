@@ -3,8 +3,11 @@ CC := g++
 # Compiler flags
 CFLAGS := -std=c++11 -Wall
 # SDL flags
-SDL_CFLAGS := $(shell sdl2-config --cflags)
-SDL_LIBS := $(shell sdl2-config --libs)
+SDL_CFLAGS := $(shell pkg-config --cflags sdl2)
+SDL_LIBS := $(shell pkg-config --libs sdl2)
+# SDL2_image flags
+SDL_IMAGE_CFLAGS := $(shell pkg-config --cflags SDL2_image)
+SDL_IMAGE_LIBS := $(shell pkg-config --libs SDL2_image)
 
 # Directories
 SRC_DIR := src
@@ -22,11 +25,11 @@ all: $(TARGET)
 
 # Rule to make the target
 $(TARGET): $(OBJS)
-	$(CC) $(CFLAGS) $(SDL_CFLAGS) $^ -o $@ $(SDL_LIBS)
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) $(SDL_IMAGE_CFLAGS) $^ -o $@ $(SDL_LIBS) $(SDL_IMAGE_LIBS)
 
 # Rule to compile source files to object files
 $(BIN_DIR)/%.o: $(SRC_DIR)/%.cpp
-	$(CC) $(CFLAGS) $(SDL_CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) $(SDL_CFLAGS) $(SDL_IMAGE_CFLAGS) -c $< -o $@
 
 # Clean rule
 clean:

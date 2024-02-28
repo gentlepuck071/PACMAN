@@ -1,6 +1,7 @@
 #include "ui.h"
 #include <iostream>
 #include <SDL.h>
+#include <SDL2/SDL_image.h>
 
 bool UserInterface::init() {
     // Initialization flag
@@ -8,7 +9,7 @@ bool UserInterface::init() {
 
     // Initialise SDL
     if(SDL_Init(SDL_INIT_VIDEO) < 0) {
-        std::cout << "SDL could not be initialized! SLD_Error: " << SDL_GetError() << std::endl;
+        std::cout << "SDL could not be initialized! SDL_Error: " << SDL_GetError() << std::endl;
         succes = false;
     }
     else {
@@ -19,12 +20,41 @@ bool UserInterface::init() {
             succes = false;
         }
         else {
-            // Get main windows surface
-            mainScrSurface = SDL_GetWindowSurface(mainWindow);
+            // Initialize PNG loading
+            int imgFlags = IMG_INIT_PNG;
+            if(!(IMG_Init(imgFlags) & imgFlags)) {
+                std::cout << "SDL_image could not be initialized SDL_Error: " << SDL_GetError() << std::endl;
+                succes = false;
+            }
+            else {
+                // Get main window surface
+                mainScrSurface = SDL_GetWindowSurface(mainWindow);
+            }
         }
     }
 
     return succes;
+}
+
+SDL_Surface* UserInterface::loadSurface(std::string imgPath) {
+    // Final optimized image
+    SDL_Surface* optimizedSurface = NULL;
+    
+    // Load image at specified path
+    SDL_Surface* loadedSurface = IMG_Load(imgPath.c_str());
+    if(loadedSurface == NULL)
+        std::cout << "Unable to load image " << imgPath << " SDL_Error: " << SDL_GetError() << std::endl;
+    else {
+        // Convert surface to screen format
+        optimizedSurface = SDL_ConvertSurface(loadedSurface, mainScrSurface->format, 0);
+        if(optimizedSurface == NULL)
+            std::cout << "Unable to optimize image " << imgPath << " SDL_Error: " << SDL_GetError() << std::endl;
+
+        // Get rid of the old loaded surface
+        SDL_FreeSurface(loadedSurface);
+    }
+
+    return optimizedSurface;
 }
 
 bool UserInterface::loadMedia() {
@@ -32,24 +62,11 @@ bool UserInterface::loadMedia() {
     bool succes = true;
 
     // Load image
-    backgroundSurface = SDL_LoadBMP(backgroundImgPath.c_str());
+    backgroundSurface = loadSurface(backgroundImgPath);
     if(backgroundSurface == NULL) {
         std::cout << "Unable to load image! SDL_Error: " << SDL_GetError() << std::endl;
         succes = false;
-    }
-    else {
-        if((mainScrSurface == NULL) || (mainWindow == NULL)) {
-            std::cout << "Window not initialized! SDL_Error: " << SDL_GetError() << std::endl;
-            succes = false;
-        }
-        else {
-            // Apply the image
-            SDL_BlitSurface(backgroundSurface, NULL, mainScrSurface, NULL);
-
-            // Update the surface
-            SDL_UpdateWindowSurface(mainWindow);
-        }
-    }
+    } 
 
     return succes;
 }
@@ -84,6 +101,12 @@ int UserInterface::gameLoop() {
                 if(e.type == SDL_QUIT)
                     quit = true;
             }
+
+            // Apply the image
+            SDL_BlitSurface(backgroundSurface, NULL, mainScrSurface, NULL);
+
+            // Update the surface
+            SDL_UpdateWindowSurface(mainWindow);
         }
     } 
 
